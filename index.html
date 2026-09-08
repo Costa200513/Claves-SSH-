@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contraseña vs. Claves SSH</title>
+    <style>
+      :root {
+        --bg: #070b16;
+        --panel: #0f172a;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --cyan: #22d3ee;
+        --violet: #a78bfa;
+        --border: #243244;
+        --danger: #fb7185;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(
+            circle at 18% 12%,
+            rgba(34, 211, 238, 0.1),
+            transparent 28%
+          ),
+          radial-gradient(
+            circle at 82% 10%,
+            rgba(167, 139, 250, 0.12),
+            transparent 30%
+          ),
+          linear-gradient(180deg, #070b16 0%, #0a1020 100%);
+      }
+
+      .wrap {
+        width: 100%;
+        height: 100vh;
+        padding: 18px 26px;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 14px;
+      }
+
+      header {
+        text-align: center;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(28px, 3.5vw, 44px);
+        letter-spacing: -0.03em;
+      }
+
+      .board {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .column {
+        min-height: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(15, 23, 42, 0.97),
+          rgba(10, 15, 29, 0.96)
+        );
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 14px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .column::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 3px;
+      }
+
+      .password::before {
+        background: linear-gradient(90deg, var(--danger), transparent);
+      }
+      .keys::before {
+        background: linear-gradient(
+          90deg,
+          var(--violet),
+          var(--cyan),
+          transparent
+        );
+      }
+
+      .column h2 {
+        margin: 0 0 10px;
+        font-size: 24px;
+        text-align: center;
+      }
+
+      .password h2 {
+        color: #fda4af;
+      }
+      .keys h2 {
+        color: var(--violet);
+      }
+
+      .dropzone {
+        flex: 1;
+        min-height: 0;
+        border: 1px dashed rgba(148, 163, 184, 0.28);
+        border-radius: 14px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: 0.2s ease;
+        background: rgba(255, 255, 255, 0.01);
+      }
+
+      .column.drag-over .dropzone {
+        border-color: var(--cyan);
+        background: rgba(34, 211, 238, 0.05);
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        min-height: 0;
+      }
+
+      .card {
+        background: linear-gradient(
+          180deg,
+          rgba(24, 35, 61, 0.96),
+          rgba(15, 24, 44, 0.96)
+        );
+        border: 1px solid #334463;
+        border-radius: 12px;
+        padding: 10px 8px;
+        cursor: grab;
+        user-select: none;
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-weight: 700;
+        line-height: 1.25;
+        font-size: clamp(12px, 1vw, 15px);
+        transition: 0.18s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: #567097;
+      }
+
+      .card.dragging {
+        opacity: 0.42;
+        transform: scale(0.98);
+      }
+
+      @media (max-width: 1050px) {
+        .cards {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .wrap {
+          padding: 14px 18px;
+        }
+        h1 {
+          font-size: 32px;
+        }
+        .column h2 {
+          font-size: 21px;
+        }
+        .card {
+          min-height: 60px;
+          font-size: 12px;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .cards {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .board {
+          grid-template-columns: 1fr 1fr;
+        }
+        .card {
+          min-height: 54px;
+          font-size: 11px;
+        }
+        .column {
+          padding: 10px;
+        }
+        .column h2 {
+          font-size: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>Contraseña vs. Claves SSH</h1>
+      </header>
+
+      <section class="board">
+        <div class="column password">
+          <h2>Contraseña</h2>
+          <div class="dropzone"></div>
+        </div>
+
+        <div class="column keys">
+          <h2>Claves SSH</h2>
+          <div class="dropzone"></div>
+        </div>
+      </section>
+
+      <div class="cards" id="pool">
+        <div class="card" draggable="true">
+          Se escribe al iniciar la conexión
+        </div>
+        <div class="card" draggable="true">Se genera en pares</div>
+        <div class="card" draggable="true">
+          Puede volverse poco práctico en accesos frecuentes
+        </div>
+        <div class="card" draggable="true">
+          Autoriza desde el servidor al cliente
+        </div>
+        <div class="card" draggable="true">
+          El usuario debe recordar y protegerla
+        </div>
+        <div class="card" draggable="true">
+          El usuario no necesita recordarla
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const cards = document.querySelectorAll(".card");
+      const columns = document.querySelectorAll(".column");
+      const pool = document.getElementById("pool");
+      let dragged = null;
+
+      cards.forEach((card) => {
+        card.addEventListener("dragstart", () => {
+          dragged = card;
+          card.classList.add("dragging");
+        });
+
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+          dragged = null;
+          columns.forEach((c) => c.classList.remove("drag-over"));
+        });
+
+        card.addEventListener("dblclick", () => pool.appendChild(card));
+      });
+
+      columns.forEach((column) => {
+        const zone = column.querySelector(".dropzone");
+
+        column.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          column.classList.add("drag-over");
+        });
+
+        column.addEventListener("dragleave", () => {
+          column.classList.remove("drag-over");
+        });
+
+        column.addEventListener("drop", (e) => {
+          e.preventDefault();
+          column.classList.remove("drag-over");
+          if (dragged) zone.appendChild(dragged);
+        });
+      });
+    </script>
+  </body>
+</html>
